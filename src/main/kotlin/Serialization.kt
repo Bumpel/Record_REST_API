@@ -1,4 +1,4 @@
-package com.RecordAPI
+/*package com.RecordAPI
 
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -20,3 +20,4 @@ fun Application.configureSerialization() {
     }
 
 }
+*/
