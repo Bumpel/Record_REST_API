@@ -53,6 +53,25 @@ fun Application.configureRouting() {
 
             call.respond(json)
         }
+        get("/album/{id}") {
+            val idParam = call.parameters["id"]
+            val id = idParam?.toIntOrNull()
+
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
+                return@get
+            }
+
+            val album = Album(
+                id = id,
+                owner = "example_owner",
+                title = "Example Title",
+                artist = "Example Artist",
+                year = 2020
+            )
+            val json = mapper.writeValueAsString(album)
+            call.respond(json)
+        }
         post("/album") {
             val body = call.receiveText()
             val albumUpload: AlbumUpload = mapper.readValue(body)
