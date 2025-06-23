@@ -12,7 +12,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.request.receiveText
 
 val mapper: ObjectMapper = jacksonObjectMapper()
-data class Album(
+data class Record(
     val id: Int,
     val owner: String,
     val title: String,
@@ -20,7 +20,7 @@ data class Album(
     val year: Int
 )
 
-data class AlbumUpload(
+data class RecordUpload(
     val owner: String,
     val title: String,
     val artist: String,
@@ -42,7 +42,7 @@ fun Application.configureRouting() {
         }
 
         get("/album") {
-            val newAlbum = Album(
+            val newAlbum = Record(
                 id = 1,
                 owner = "alice",
                 title = "Dark Side of the Moon",
@@ -62,7 +62,7 @@ fun Application.configureRouting() {
                 return@get
             }
 
-            val album = Album(
+            val album = Record(
                 id = id,
                 owner = "example_owner",
                 title = "Example Title",
@@ -74,7 +74,7 @@ fun Application.configureRouting() {
         }
         post("/album") {
             val body = call.receiveText()
-            val albumUpload: AlbumUpload = mapper.readValue(body)
+            val albumUpload: RecordUpload = mapper.readValue(body)
 
             // Ausgabe im Server-Log
             println("Received album upload: $albumUpload")
