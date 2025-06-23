@@ -12,74 +12,18 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.server.request.receiveText
 
 val mapper: ObjectMapper = jacksonObjectMapper()
-data class Record(
-    val id: Int,
-    val owner: String,
-    val title: String,
-    val artist: String,
-    val year: Int
-)
 
-data class RecordUpload(
-    val owner: String,
-    val title: String,
-    val artist: String,
-    val year: Int
-)
-
-//private const val BASE_URL = "http://192.168.179.3:8100"
 
 fun Application.configureRouting() {
-    install(StatusPages) {
+    /*install(StatusPages) {
         exception<Throwable> { call, cause ->
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
         }
-    }
+    }*/
 
     routing {
         get("/") {
             call.respondText("Hello World!")
-        }
-
-        get("/album") {
-            val newAlbum = Record(
-                id = 1,
-                owner = "alice",
-                title = "Dark Side of the Moon",
-                artist = "Pink Floyd",
-                year = 1973
-            )
-            val json = mapper.writeValueAsString(newAlbum)
-
-            call.respond(json)
-        }
-        get("/album/{id}") {
-            val idParam = call.parameters["id"]
-            val id = idParam?.toIntOrNull()
-
-            if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
-                return@get
-            }
-
-            val album = Record(
-                id = id,
-                owner = "example_owner",
-                title = "Example Title",
-                artist = "Example Artist",
-                year = 2020
-            )
-            val json = mapper.writeValueAsString(album)
-            call.respond(json)
-        }
-        post("/album") {
-            val body = call.receiveText()
-            val albumUpload: RecordUpload = mapper.readValue(body)
-
-            // Ausgabe im Server-Log
-            println("Received album upload: $albumUpload")
-
-            call.respond(HttpStatusCode.OK, "Album received")
         }
 
         staticResources("/static", "static")
