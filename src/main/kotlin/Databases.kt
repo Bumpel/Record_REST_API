@@ -73,12 +73,25 @@ fun Application.configureDatabases() {
             }
 
             val updated = call.receive<DBRecordUpload>()
-            val record = recordService.update(id, updated)
 
+            // Erst prüfen ob Record existiert
+            val existingRecord = recordService.read(id)
+            if (existingRecord == null) {
+                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden")
+                return@put
+            }
+
+            // Dann Owner-Berechtigung prüfen
+            if (existingRecord.owner != updated.owner) {
+                call.respond(HttpStatusCode.Forbidden, "Nur der Owner darf den Record aktualisieren")
+                return@put
+            }
+
+            val record = recordService.update(id, updated)
             if (record != null) {
                 call.respond(HttpStatusCode.OK, record)
             } else {
-                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden oder Owner stimmt nicht überein")
+                call.respond(HttpStatusCode.InternalServerError, "Fehler beim Aktualisieren")
             }
         }
 
@@ -87,8 +100,26 @@ fun Application.configureDatabases() {
             val id = call.parameters["id"]?.toIntOrNull()
             val owner = call.request.queryParameters["owner"]
 
-            if (id == null || owner == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID oder Owner fehlen")
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
+                return@delete
+            }
+
+            if (owner == null) {
+                call.respond(HttpStatusCode.BadRequest, "Owner-Parameter fehlt")
+                return@delete
+            }
+
+            // Erst prüfen ob Record existiert
+            val existingRecord = recordService.read(id)
+            if (existingRecord == null) {
+                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden")
+                return@delete
+            }
+
+            // Dann Owner-Berechtigung prüfen
+            if (existingRecord.owner != owner) {
+                call.respond(HttpStatusCode.Forbidden, "Nur der Owner darf den Record löschen")
                 return@delete
             }
 
@@ -96,7 +127,7 @@ fun Application.configureDatabases() {
             if (success) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
-                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden oder Owner stimmt nicht überein")
+                call.respond(HttpStatusCode.InternalServerError, "Fehler beim Löschen")
             }
         }
     }
