@@ -21,6 +21,10 @@ data class DBRecordUpload(
     val year: Int
 )
 
+data class ErrorResponse(
+    val message: String
+)
+
 class RecordService(database: Database) {
 
     object Records : Table() {

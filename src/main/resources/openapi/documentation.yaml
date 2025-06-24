@@ -1,0 +1,284 @@
+openapi: 3.0.0
+info:
+  title: Record API
+  description: API for managing music records with owner-based access control
+  version: 0.0.1
+  contact:
+    name: Record API Support
+servers:
+  - url: http://localhost:8100
+    description: Local development server
+
+tags:
+  - name: Records
+    description: Operations related to music records
+
+paths:
+  /records:
+    get:
+      tags:
+        - Records
+      summary: Get all records
+      description: Retrieve a list of all records in the database
+      operationId: getAllRecords
+      responses:
+        '200':
+          description: List of all records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DBRecord'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      tags:
+        - Records
+      summary: Create a new record
+      description: Create a new music record entry
+      operationId: createRecord
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DBRecordUpload'
+      responses:
+        '201':
+          description: Record created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DBRecord'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /records/{id}:
+    get:
+      tags:
+        - Records
+      summary: Get a record by ID
+      description: Retrieve a specific record by its ID
+      operationId: getRecordById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Record ID
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Record found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DBRecord'
+        '400':
+          description: Invalid ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      tags:
+        - Records
+      summary: Update a record
+      description: Update an existing record. Only the owner can update their records.
+      operationId: updateRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Record ID to update
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DBRecordUpload'
+      responses:
+        '200':
+          description: Record updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DBRecord'
+        '400':
+          description: Invalid ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Only the owner can update the record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      tags:
+        - Records
+      summary: Delete a record
+      description: Delete a record by ID. Only the owner can delete their records.
+      operationId: deleteRecord
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Record ID to delete
+          schema:
+            type: integer
+            format: int32
+        - name: owner
+          in: query
+          required: true
+          description: Owner of the record (required for authorization)
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Record deleted successfully
+        '400':
+          description: Invalid ID format or missing owner parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Only the owner can delete the record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    DBRecord:
+      type: object
+      description: A complete record with all fields
+      required:
+        - id
+        - owner
+        - title
+        - artist
+        - year
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Unique identifier for the record
+          example: 1
+        owner:
+          type: string
+          description: Owner of the record
+          example: john_doe
+        title:
+          type: string
+          description: Title of the record
+          example: Abbey Road
+        artist:
+          type: string
+          description: Artist name
+          example: The Beatles
+        year:
+          type: integer
+          format: int32
+          description: Release year
+          example: 1969
+
+    DBRecordUpload:
+      type: object
+      description: Record data for creating or updating a record
+      required:
+        - owner
+        - title
+        - artist
+        - year
+      properties:
+        owner:
+          type: string
+          description: Owner of the record
+          example: john_doe
+        title:
+          type: string
+          description: Title of the record
+          example: Abbey Road
+        artist:
+          type: string
+          description: Artist name
+          example: The Beatles
+        year:
+          type: integer
+          format: int32
+          description: Release year
+          example: 1969
+
+    ErrorResponse:
+      type: object
+      description: Error response
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: Record not found

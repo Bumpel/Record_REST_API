@@ -5,6 +5,7 @@ import io.ktor.serialization.jackson.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.plugins.swagger.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -30,11 +31,14 @@ fun Application.configureDatabases() {
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            call.respond(HttpStatusCode.InternalServerError, "Serverfehler: ${cause.localizedMessage}")
+            call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Serverfehler: ${cause.localizedMessage}"))
         }
     }
 
     routing {
+        // Swagger UI (einfache Version)
+        swaggerUI(path = "docs", swaggerFile = "openapi/documentation.yaml")
+
         // Get All Records
         get("/records") {
             val records = recordService.readAll()
@@ -52,7 +56,7 @@ fun Application.configureDatabases() {
         get("/records/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Ungültige ID"))
                 return@get
             }
 
@@ -60,7 +64,7 @@ fun Application.configureDatabases() {
             if (record != null) {
                 call.respond(HttpStatusCode.OK, record)
             } else {
-                call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.NotFound, ErrorResponse("Record nicht gefunden"))
             }
         }
 
@@ -68,7 +72,7 @@ fun Application.configureDatabases() {
         put("/records/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Ungültige ID"))
                 return@put
             }
 
@@ -77,13 +81,13 @@ fun Application.configureDatabases() {
             // Erst prüfen ob Record existiert
             val existingRecord = recordService.read(id)
             if (existingRecord == null) {
-                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden")
+                call.respond(HttpStatusCode.NotFound, ErrorResponse("Record nicht gefunden"))
                 return@put
             }
 
             // Dann Owner-Berechtigung prüfen
             if (existingRecord.owner != updated.owner) {
-                call.respond(HttpStatusCode.Forbidden, "Nur der Owner darf den Record aktualisieren")
+                call.respond(HttpStatusCode.Forbidden, ErrorResponse("Nur der Owner darf den Record aktualisieren"))
                 return@put
             }
 
@@ -91,7 +95,7 @@ fun Application.configureDatabases() {
             if (record != null) {
                 call.respond(HttpStatusCode.OK, record)
             } else {
-                call.respond(HttpStatusCode.InternalServerError, "Fehler beim Aktualisieren")
+                call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Fehler beim Aktualisieren"))
             }
         }
 
@@ -101,25 +105,25 @@ fun Application.configureDatabases() {
             val owner = call.request.queryParameters["owner"]
 
             if (id == null) {
-                call.respond(HttpStatusCode.BadRequest, "Ungültige ID")
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Ungültige ID"))
                 return@delete
             }
 
             if (owner == null) {
-                call.respond(HttpStatusCode.BadRequest, "Owner-Parameter fehlt")
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Owner-Parameter fehlt"))
                 return@delete
             }
 
             // Erst prüfen ob Record existiert
             val existingRecord = recordService.read(id)
             if (existingRecord == null) {
-                call.respond(HttpStatusCode.NotFound, "Record nicht gefunden")
+                call.respond(HttpStatusCode.NotFound, ErrorResponse("Record nicht gefunden"))
                 return@delete
             }
 
             // Dann Owner-Berechtigung prüfen
             if (existingRecord.owner != owner) {
-                call.respond(HttpStatusCode.Forbidden, "Nur der Owner darf den Record löschen")
+                call.respond(HttpStatusCode.Forbidden, ErrorResponse("Nur der Owner darf den Record löschen"))
                 return@delete
             }
 
@@ -127,7 +131,7 @@ fun Application.configureDatabases() {
             if (success) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
-                call.respond(HttpStatusCode.InternalServerError, "Fehler beim Löschen")
+                call.respond(HttpStatusCode.InternalServerError, ErrorResponse("Fehler beim Löschen"))
             }
         }
     }
