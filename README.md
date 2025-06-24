@@ -349,22 +349,6 @@ curl -X PUT http://localhost:8100/records/1 \
 curl -X DELETE "http://localhost:8100/records/1?owner=John"
 ```
 
-## 🛠️ Entwicklung
-
-### Tests ausführen
-```bash
-./gradlew test
-```
-
-### Development-Server starten
-```bash
-./gradlew run
-```
-
-### Build erstellen
-```bash
-./gradlew build
-```
 
 ## 🐛 Troubleshooting
 
