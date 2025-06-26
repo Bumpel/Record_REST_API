@@ -5,6 +5,7 @@ plugins {
 }
 
 val ktor_version: String by project
+val kotlin_version: String by project
 group = "com.RecordAPI"
 version = "0.0.1"
 
@@ -29,7 +30,17 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
     testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.kotlin.test.junit)
+
+    // Fürs Testen
+    testImplementation("io.ktor:ktor-server-tests:$ktor_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("io.ktor:ktor-client-core:$ktor_version")
+    testImplementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    testImplementation("io.ktor:ktor-client-cio:$ktor_version")
+    testImplementation("io.ktor:ktor-client-mock:$ktor_version")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlin_version")
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 
     // Jackson für JSON Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
@@ -40,4 +51,8 @@ dependencies {
 
     // Nur Swagger UI - ohne komplexe OpenAPI Dependencies
     implementation("io.ktor:ktor-server-swagger-jvm:$ktor_version")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }

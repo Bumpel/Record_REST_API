@@ -5,17 +5,20 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import io.ktor.client.call.*
 
 class ApplicationTest {
 
     @Test
-    fun testRoot() = testApplication {
+    fun testRootEndpoint() = testApplication {
         application {
-            module()
+            // This is where you set up the app (optional if you use modules)
+            module() // call your main module
         }
-        client.get("/").apply {
-            assertEquals(HttpStatusCode.OK, status)
-        }
+
+        val response = client.get("/") // Test your route
+        assertEquals(200, response.status.value)
+        assertEquals("Hello World!", response.body<String>())
     }
 
 }
