@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.ktor.server.netty)
     implementation(libs.logback.classic)
     testImplementation(libs.ktor.server.test.host)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 
     // Fürs Testen
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
