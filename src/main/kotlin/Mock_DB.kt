@@ -1,5 +1,7 @@
 package com.RecordAPI
 
+import com.RecordAPI.domain.DBRecord
+import com.RecordAPI.domain.DBRecordUpload
 
 
 class MockRecordRepository : RecordRepository {

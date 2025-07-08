@@ -11,6 +11,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import io.ktor.client.call.*
 import kotlinx.coroutines.test.runTest
+import com.RecordAPI.domain.*
 
 class ApplicationTest {
     // Erstellt ein neues Mock-Repository.

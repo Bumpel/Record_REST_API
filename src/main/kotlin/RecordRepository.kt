@@ -1,5 +1,7 @@
 package com.RecordAPI
 
+import com.RecordAPI.domain.*
+
 interface RecordRepository {
     suspend fun create(record: DBRecordUpload): DBRecord
     suspend fun read(id: Int): DBRecord?
