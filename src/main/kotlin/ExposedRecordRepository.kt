@@ -24,7 +24,7 @@ class ExposedRecordRepository(database: Database) : RecordRepository {
         }
     }
 
-    // Das block-Lambda MUSS non-suspend sein!
+    
     private suspend fun <T> dbQuery(block: () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 
