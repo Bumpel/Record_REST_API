@@ -29,7 +29,7 @@ fun Route.recordRoutes(recordService: RecordService) {
             } else {
                 call.respond(HttpStatusCode.NotFound, ErrorResponse("Record nicht gefunden"))
             }
-            call.respondText("Hello World!")
+
         }
         put("{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
@@ -41,6 +41,10 @@ fun Route.recordRoutes(recordService: RecordService) {
                 call.receive<DBRecordUpload>()
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, ErrorResponse("Ungültiger Body: ${e.localizedMessage}"))
+                return@put
+            }
+            if (updated.owner.isBlank() || updated.title.isBlank() || updated.artist.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("All fields are required"))
                 return@put
             }
             val existingRecord = recordService.read(id)
@@ -95,6 +99,15 @@ fun Route.recordRoutes(recordService: RecordService) {
                 call.receive<DBRecordUpload>()
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, ErrorResponse("Ungültiger Body: ${e.localizedMessage}"))
+                return@post
+            }
+            if (recordUpload.owner.isBlank() || recordUpload.title.isBlank() || recordUpload.artist.isBlank()) {
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("All fields are required"))
+                return@post
+            }
+
+            if (recordUpload.owner.length > 50) {
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Owner name too long"))
                 return@post
             }
             val record = recordService.create(recordUpload)

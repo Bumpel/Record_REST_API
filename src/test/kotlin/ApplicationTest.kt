@@ -13,6 +13,7 @@ import io.ktor.client.call.*
 import kotlinx.coroutines.test.runTest
 import com.RecordAPI.domain.*
 
+
 class ApplicationTest {
     // Erstellt ein neues Mock-Repository.
     val repo: RecordRepository = MockRecordRepository()
@@ -27,6 +28,24 @@ class ApplicationTest {
         val response = client.get("/")
         assertEquals(200, response.status.value)
         assertEquals("Hello World!", response.body<String>())
+    }
+    @Test
+    fun testCreateRecordEndpoint() = testApplication {
+        application { module() }
+
+        val response = client.post("/records") {
+            contentType(ContentType.Application.Json)
+            setBody("""
+            {
+                "owner": "test",
+                "title": "album", 
+                "artist": "artist",
+                "year": 2023
+            }
+        """.trimIndent())
+        }
+
+        assertEquals(HttpStatusCode.Created, response.status)
     }
 
     @Test

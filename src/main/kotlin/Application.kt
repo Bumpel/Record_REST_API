@@ -55,7 +55,7 @@ fun Application.module() {
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            cause.printStackTrace() // Hilfreich für Debugging
+
             call.respond(
                 status = HttpStatusCode.InternalServerError,
                 message = ErrorResponse("Serverfehler: ${cause.localizedMessage}")
